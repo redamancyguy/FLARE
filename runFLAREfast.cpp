@@ -146,6 +146,13 @@ int main(int argc, char *argv[]) {
                                     static_cast<idx_t>(range_query_num), static_cast<idx_t>(range_query_num),
                                     static_cast<idx_t>(kNN_query_num), 2.5);
     int64_t output_dim = 12;
+     if(value < 0.1f) {
+        output_dim = 12;
+    } else if (value >= 0.1f && value < 0.3f) {
+        output_dim = 13;
+    } else if (value >= 0.3f) {
+        output_dim = 14;
+    }
     // output_dim = 17;
     num_t c = 2;
     num_t k_ = 5 * std::pow(static_cast<num_t>(workload.size), 0.7);
