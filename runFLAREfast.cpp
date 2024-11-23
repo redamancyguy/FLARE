@@ -9,8 +9,8 @@
 #include "utils/TimerClock.hpp"
 
 
-#include <nlohmann/json.hpp>
-#include <indicators.hpp>
+//#include <nlohmann/json.hpp>
+#include "/home/redamancyguy/Desktop/0-workspace/codes/libs/nlohmann/json.hpp"
 using json = nlohmann::json;
 
 #include "FLAREFast.hpp"
@@ -31,16 +31,6 @@ auto run_affix_fast(WorkLoad<T> &workload, FLAREFast<T> &index, num_t k_, num_t 
 
         // using namespace ;
 
-        indicators::ProgressBar bar{
-            indicators::option::BarWidth{50},
-            indicators::option::Start{"["},
-            indicators::option::Fill{"="},
-            indicators::option::Lead{">"},
-            indicators::option::Remainder{" "},
-            indicators::option::End{"]"},
-            indicators::option::ForegroundColor{indicators::Color::green},
-            indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}
-        };
         for (int _ = 0, kNN_query_size = workload.kNN_query_size(); _ < kNN_query_size; ++_) {
             torch::NoGradGuard no_grad;
             auto original_center = workload.get_kNN_query(_).first.view({1, -1});
@@ -89,10 +79,6 @@ auto run_affix_fast(WorkLoad<T> &workload, FLAREFast<T> &index, num_t k_, num_t 
             auto dis_func = [&](idx_t id) {
                 return calculate::dis_l2(workload.dim, original_center.template data_ptr<float>(), workload[id]);
             };
-
-            bar.set_progress(100 * static_cast<float>(_)/kNN_query_size);
-            bar.set_option(indicators::option::PostfixText{"recall:" + std::to_string(static_cast<float>(equal_num) / k).substr(0, 6) + " query-time:" +
-                std::to_string(this_time / 1e6) + "ms"});
             avg_recall += static_cast<double>(equal_num) / k;
         }
         avg_recall /= workload.kNN_query_size();
@@ -125,7 +111,7 @@ int main(int argc, char *argv[]) {
     // dataset_size = 2e7;
     dataset_size = 1e6;
     dataset_size = 1e7;
-    init_epochs = 6;
+    init_epochs = 10;
     for (int i = 1; i < argc; ++i) {
         if (strcmp(argv[i], "--k") == 0 && i + 1 < argc) {
             k_list = parse_k_values(argv[++i]);
@@ -146,30 +132,33 @@ int main(int argc, char *argv[]) {
                                     static_cast<idx_t>(range_query_num), static_cast<idx_t>(range_query_num),
                                     static_cast<idx_t>(kNN_query_num), 2.5);
     int64_t output_dim = 12;
-     if(value < 0.1f) {
+    std::map<std::string, float> skewness_dict = {
+            {"Word2Vec", 0.1181032983885169},
+            {"Deep1M", 0.13595005477806105},
+            {"Sift1B", 0.10160469578076116},
+            {"GoogleEarth", 0.017509608867848317},
+            {"MIRFLICKR", 0.015671104072814575},
+            {"TinyImages", 0.05490293569658989},
+            {"MNIST", 0.07302957646880387},
+            {"Gist", 0.10082281605404843},
+            {"Sift1M", 0.0948954985171799},
+            {"CIFAR", 0.03569944349565443},
+            {"Audio", 0.04413142573644204}
+    };
+    auto skewness = skewness_dict[dataset];
+    if(skewness < 0.1f) {
         output_dim = 12;
-    } else if (value >= 0.1f && value < 0.3f) {
+    } else if (skewness < 0.3f) {
         output_dim = 13;
-    } else if (value >= 0.3f) {
+    } else if (skewness >= 0.3f) {
         output_dim = 14;
     }
-    // output_dim = 17;
     num_t c = 2;
     num_t k_ = 5 * std::pow(static_cast<num_t>(workload.size), 0.7);
     // k_ *= 2;
     std::cout << c << ":" << k_ << std::endl;
     json result;
     json all_result;
-    if(0){
-        for(float i = 0.1;i<1000;i*=1.5) {
-            init_epochs = i;
-            FLAREFast<float> index(workload, output_dim, result, 256, 2);
-            all_result[dataset][std::to_string(workload.size)][std::to_string(init_epochs)] = run_affix_fast(workload, index, k_, c, result);
-            std::cout <<all_result[dataset][std::to_string(workload.size)][std::to_string(init_epochs)].dump()<< std::endl;;
-        }
-        ERRLN(all_result.dump());
-        return 0;
-    }
     FLAREFast<float> index(workload, output_dim, result, 256, 2);
     all_result[dataset][std::to_string(workload.size)] = run_affix_fast(workload, index, k_, c, result);
     ERRLN(all_result.dump());

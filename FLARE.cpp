@@ -4,8 +4,6 @@
 #include <future>
 #include <torch/torch.h>
 
-#include "indexes/RPTree.hpp"
-#include "indexes/MTree.hpp"
 #include "utils/dataset.hpp"
 #include "utils/WorkLoad.hpp"
 #include "utils/TimerClock.hpp"

@@ -11,20 +11,11 @@ set(CMAKE_CUDA_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 add_definitions(-DUBUNTU_NOTEBOOK)
-set(Torch_DIR "/mnt/c/Users/redamancyguy/Desktop/libtorch/share/cmake/Torch")
+set(Torch_DIR "/home/redamancyguy/Desktop/libtorch/share/cmake/Torch")
 set(CMAKE_CUDA_COMPILER /usr/local/cuda/bin/nvcc)
 find_package(Torch REQUIRED)
 find_package(Boost REQUIRED COMPONENTS fiber date_time system filesystem)
 link_libraries("${TORCH_LIBRARIES}")
-
-#add_executable(main main.cpp
-#        utils/DEFINE.h
-#        utils/WorkLoad.hpp
-#        utils/dataset.hpp
-#        indexes/VPPLUS.hpp
-#        utils/calculate.hpp
-#        indexes/Index.hpp
-#)
 
 add_executable(affix FLARE.cpp FLARE.hpp indexes/VPPLUS.hpp utils/Network.hpp utils/Model.hpp utils/TimerClock.hpp utils/WorkLoad.hpp FLARE.hpp)
 
