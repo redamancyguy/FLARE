@@ -9,8 +9,7 @@
 #include "utils/TimerClock.hpp"
 
 
-//#include <nlohmann/json.hpp>
-#include "/home/redamancyguy/Desktop/0-workspace/codes/libs/nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
 #include "FLAREFast.hpp"
